@@ -19,9 +19,8 @@ return new class extends Migration
             $table->integer('qte');
             $table->string('designation');
             $table->decimal('prixunit', 10, 2);
-            $table->timestamps();
-
             $table->foreign('diver_id')->references('id')->on('divers')->onDelete('cascade');
+            $table->timestamps();
         });
     }
 

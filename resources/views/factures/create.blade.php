@@ -7,10 +7,10 @@
         <h1>Créer une Facture</h1>
         <form action="{{ route('factures.store') }}" method="POST">
             @csrf
-            
+            <input type="hidden" name="diver_id" value="{{ $diver_id }}">
             <div class="form-group">
                 <label for="qte">QTE</label>
-                <input type="number" name="qte" id="qte" class="form-control" >
+                <input type="number" name="qte" id="qte" class="form-control" required>
             </div>
             <div class="form-group">
                 <label for="designation">Désignation</label>

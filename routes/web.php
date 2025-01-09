@@ -21,4 +21,6 @@ Route::get('/', function () {
 Route::get('factures/pdf', [FactureController::class, 'generatePDF'])->name('factures.pdf');
 Route::resource('factures', FactureController::class);
 Route::resource('divers', DiverController::class);
+Route::get('/factures/create/{diver_id}', [FactureController::class, 'create'])->name('factures.create');
+Route::post('/factures', [FactureController::class, 'store'])->name('factures.store');
 // Route::get('factures/pdf', [FactureController::class, 'generatePDF'])->name('factures.pdf');

@@ -25,7 +25,7 @@
                         <td>{{ $diver->transport }}</td>
                         <td>{{ $diver->mainoeuvre }}</td>
                         <td>
-                            <a href="{{ route('factures.create') }}" class="btn btn-primary mb-3">Suivant</a>
+                            <a href="{{ route('factures.create', ['diver_id' => $diver->id]) }}" class="btn btn-primary mb-3">Suivant</a>
                         </td>
                     </tr>
                 @endforeach

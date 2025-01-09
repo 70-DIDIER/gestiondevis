@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Diver;
-use App\Models\factures;
+use App\Models\Factures;
 use PDF;
 use Illuminate\Http\Request;
 
@@ -15,23 +15,23 @@ class FactureController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $factures = Factures::all();
-        $divers = Diver::all();
-        $date = $divers->pluck("date")->first();
-        $nomclient = $divers->pluck("nomclient")->first();
-        $nomdevis = $divers->pluck("nomdevis")->first();
+        $diver_id = $request->input('diver_id');
+        $divers = Diver::orderBy('created_at', 'desc')->get();
 
-        $totalAchat = $factures->sum(function($facture) {
-            return $facture->prixunit * $facture->qte;
-        });
+        if ($diver_id) {
+            $diver = Diver::find($diver_id);
+        } else {
+            $diver = $divers->first();
+        }
 
-        $totalTransport = $divers->sum('transport');
-        $totalMainOeuvre = $divers->sum('mainoeuvre');
+        if (!$diver) {
+            return redirect()->route('divers.index')->with('error', 'Aucun devis trouvé');
+        }
 
-        $totalGeneral = $totalAchat + $totalTransport + $totalMainOeuvre;
-        return view("factures.index", compact("factures","divers", "totalAchat", "totalTransport", "totalMainOeuvre", "totalGeneral", "date", "nomclient", "nomdevis"));
+        $factures = Factures::where('diver_id', $diver->id)->get();
+        return view('factures.index', compact('divers', 'diver', 'factures'));
     }
 
     
@@ -40,9 +40,10 @@ class FactureController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create($diver_id)
     {
-        return view("factures.create");
+        $diver = Diver::findOrFail($diver_id);
+        return view('factures.create', compact('diver', 'diver_id'));
     }
 
     /**
@@ -53,20 +54,16 @@ class FactureController extends Controller
      */
     public function store(Request $request)
     {
-        // Valider les données du formulaire
-        $data = $request->validate([
-            'qte' => 'required',
-            'designation' => 'required',
-            'prixunit' => 'required',
+        $validatedData = $request->validate([
+            'diver_id' => 'required|exists:divers,id',
+            'qte' => 'required|numeric',
+            'designation' => 'required|string',
+            'prixunit' => 'required|numeric',
         ]);
 
-        // Créer une nouvelle facture
-        $factures = new factures;
-        $factures->qte = $request->qte;
-        $factures->designation = $request->designation;
-        $factures->prixunit = $request->prixunit;
-        $factures->save();
-        return redirect()->route('factures.index');
+        Factures::create($validatedData);
+
+        return redirect()->route('factures.index')->with('success', 'Facture créée avec succès');
     }
 
     /**
@@ -113,26 +110,25 @@ class FactureController extends Controller
     {
         //
     }
-
-    public function generatePDF()
+    public function generatePDF(Request $request)
     {
-        $factures = Factures::all();
-        $divers = Diver::all();
+        // Récupérer le diver_id de la session ou de la requête
+        $diver_id = $request->input('diver_id', session('diver_id'));
+        
+        // Si aucun diver_id n'est spécifié, prendre le premier
+        if (!$diver_id) {
+            $diver = Diver::orderBy('created_at', 'desc')->first();
+        } else {
+            $diver = Diver::findOrFail($diver_id);
+        }
 
-        $totalAchat = $factures->sum(function($facture) {
-            return $facture->prixunit * $facture->qte;
-        });
+        // Récupérer les factures associées
+        $factures = Factures::where('diver_id', $diver->id)->get();
 
-        $totalTransport = $divers->sum('transport');
-        $totalMainOeuvre = $divers->sum('mainoeuvre');
-        $totalGeneral = $totalAchat + $totalTransport + $totalMainOeuvre;
-
-        $date = $divers->pluck('date')->first();
-        $nomclient = $divers->pluck('nomclient')->first();
-        $nomdevis = $divers->pluck('nomdevis')->first();
-
-        $pdf = PDF::loadView('factures.pdf', compact('factures', 'divers', 'totalAchat', 'totalTransport', 'totalMainOeuvre', 'totalGeneral', 'date', 'nomclient', 'nomdevis'));
-
-        return $pdf->download('factures.pdf');
+        // Générer le PDF
+        $pdf = PDF::loadView('factures.pdf', compact('diver', 'factures'));
+        
+        // Télécharger avec un nom personnalisé
+        return $pdf->download('facture_' . $diver->nomdevis . '.pdf');
     }
 }

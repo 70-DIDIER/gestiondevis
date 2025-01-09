@@ -59,9 +59,9 @@ class DiverController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Diver $diver)
     {
-        //
+        return view('divers.show', compact('diver'));
     }
 
     /**
