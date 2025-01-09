@@ -4,37 +4,29 @@
 
 @section('content')
     <div class="container">
-        <h1>Créer une Facture</h1>
-        <form action="{{ route('factures.store') }}" method="POST">
-            @csrf
-            <input type="hidden" name="diver_id" value="{{ $diver_id }}">
-            <div class="form-group">
-                <label for="qte">QTE</label>
-                <input type="number" name="qte" id="qte" class="form-control" required>
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8">
+                <h1 class="mb-4">Créer une Facture</h1>
+                <form action="{{ route('factures.store') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="diver_id" value="{{ $diver_id }}">
+                    <div class="form-group">
+                        <label for="qte">Quantité</label>
+                        <input type="number" name="qte" id="qte" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="designation">Désignation</label>
+                        <input type="text" name="designation" id="designation" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="prixunit">Prix unitaire</label>
+                        <input type="number" name="prixunit" id="prixunit" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary btn-block">Ajouter</button>
+                    </div>
+                </form>
             </div>
-            <div class="form-group">
-                <label for="designation">Désignation</label>
-                <input type="text" name="designation" id="designation" class="form-control">
-            </div>
-            <div class="form-group">
-                <label for="prixunit">Prix unitaire</label>
-                <input type="number" name="prixunit" id="prixunit" class="form-control" >
-            </div>
-            <button type="submit" class="btn btn-primary">Ajouter</button>
-        </form>
+        </div>
     </div>
-
-    <!-- <script>
-        function calculateTotal() {
-            var qte = document.getElementById('qte').value;
-            var prixunit = document.getElementById('prixunit').value;
-            var prixtotal = document.getElementById('prixtotal');
-
-            if (qte && prixunit) {
-                prixtotal.value = qte * prixunit;
-            } else {
-                prixtotal.value = 0;
-            }
-        }
-    </script> -->
 @endsection
